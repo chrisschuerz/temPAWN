@@ -27,11 +27,12 @@
 #'   parameters.
 #'
 #' @importFrom doSNOW registerDoSNOW
-#' @importFrom dplyr %>% bind_cols
+#' @importFrom dplyr %>% bind_cols bind_rows select
 #' @importFrom foreach foreach %dopar%
 #' @importFrom lubridate now
-#' @importFrom parallel detectCores makeCluster parSapply stopCluster
-#' @importFrom tibble tibble
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom purrr map set_names transpose
+#' @importFrom tibble add_column tibble
 #'
 #'
 #' \cite{Pianosi, F. and Wagener T.: Distribution-based sensitivity analysis
@@ -63,9 +64,8 @@ tempawn <- function(sim, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
       as_tibble(., ) %>%
       set_names(., paste("dummy", 1:n_dummy, sep = "_"))
 
-      inp <- bind_cols(inp, dummy)
+    inp <- bind_cols(inp, dummy)
   }
-
 
   inp <- map(inp, ~cut(.x, breaks = bins, labels = FALSE))
 
@@ -89,6 +89,9 @@ tempawn <- function(sim, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
                         t_i <- pawn_i(inp_tgt_i, idx, stat)
                         return(t_i)
                       }
+
+  stopCluster(cl)
+
   res_tbl <- res_list %>%
     transpose(.) %>%
     map(., ~bind_rows(.x)) %>%
@@ -97,6 +100,10 @@ tempawn <- function(sim, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
 
 }
 
+
+#' Calculate pawn index for a sample defined by the indices idx (required for boot)
+#' @importFrom dplyr slice group_by summarise ungroup %>%
+#' @keywords internal
 compute_dummy_95 <- function(res_i){
   dummy_95 <- res_i %>%
     select(starts_with("dummy_")) %>%
@@ -123,9 +130,16 @@ pawn_ij <- function(inp_tgt_ij, idx, stat) {
   map_df(inp_tgt_ij, ~ pawn_bin(dat = .x, idx = idx, stat = stat))
 }
 
-#' Calculate pawn index for a sample defined by the indices idx (required for boot)
-#' @importFrom dplyr slice group_by summarise ungroup %>%
+#' Compute the PAWN index for the defined bins for one input and one target
+#'
+#' @param dat Table that provides the input and the target pairs
+#' @param idx index that defines the bin classes
+#' @param stat The summary statistics function that is implemented to compute
+#'   the PAWN index.
+#'
+#' @importFrom dplyr %>% group_by slice summarise ungroup
 #' @keywords internal
+#'
 pawn_bin <- function(dat, idx, stat) {
   dat <- slice(dat, idx)
   b <- dat$target
