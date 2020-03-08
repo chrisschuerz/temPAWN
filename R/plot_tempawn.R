@@ -1,4 +1,19 @@
-
+#' Plot analysis results of temoral PAWN analysis
+#'
+#' @param tempawn The list object that is returned by \code{tempawn()}.
+#'
+#' @return Returns a ggplot object with the visualization of the simulation ranges
+#'   and the individual temoral parameter sensitivities.
+#'
+#' @import ggplot2
+#' @import patchwork
+#' @importFrom dplyr %>% bind_rows mutate select
+#' @importFrom purrr map map2 map_df set_names transpose
+#' @importFrom tibble add_column
+#' @importFrom tidyr gather
+#'
+#' @export
+#'
 plot.tempawn <- function(tempawn) {
 
   var_name <- names(tempawn$sensitivity)
