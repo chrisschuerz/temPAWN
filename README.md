@@ -81,6 +81,12 @@ plot(pwn)
 
 <img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: auto;" />
 
+##### Plot idea: FDC plots and corresponding parameter sensitivities
+
+An idea that I just had. Generate FDC boundaries of simulated variable and plot the corresponding parameter sensitivities. Line plots are very messy, maybe smooth splines helpful?
+
+<img src="fig/fdc_ex.svg" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: auto;" />
+
  ### References
  
  Pianosi, F. and Wagener T.: Distribution-based sensitivity analysis from a generic input-output sample, *Environmental Modelling & Software*, 108, 197-207, doi: [10.1016/j.envsoft.2018.07.019](https://doi.org/10.1016/j.envsoft.2018.07.019), 2018
