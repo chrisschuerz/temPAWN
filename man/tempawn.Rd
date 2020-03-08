@@ -10,6 +10,9 @@ tempawn(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cores = NULL)
 \item{sim}{The simulation output object that results from a simulation with
 run_swat2012() or run_swatplus() from the SWATplusR package.}
 
+\item{var}{String vector of simulated variables that should be included in the
+sensitivity analysis. \code{Default = NULL} means all variables are included.}
+
 \item{stat}{The summary statistics that is used to compute the PAWN sensitivity
 index. Pianosi and Wagener (2015) suggest to implement the median or max.
 \code{Default = median}}
