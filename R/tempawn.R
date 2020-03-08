@@ -32,9 +32,9 @@
 #' @importFrom lubridate now
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom purrr map set_names transpose
-#' @importFrom tibble add_column tibble
+#' @importFrom tibble add_column as_tibble tibble
 #'
-#'
+#' @references
 #' \cite{Pianosi, F. and Wagener T.: Distribution-based sensitivity analysis
 #'       from a generic input-output sample, Environmental Modelling & Software,
 #'       108, 197-207, \url{https://doi.org/10.1016/j.envsoft.2018.07.019}, 2018}
@@ -45,10 +45,22 @@
 #'       Environmental Modelling & Software, 67, 1-11,
 #'       \url{https://doi.org/10.1016/j.envsoft.2015.01.004}, 2015}
 #' @export
+#'
+tempawn <- function(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
 
-tempawn <- function(sim, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
+  var_names <- names(sim$simulation)
+
+  if (is.null(var)) {
+    var <- var_names
+  } else if (!any(var %in% var_names)) {
+    stop("At least one of the variables not available in 'sim$simulation'")
+  }
+
   tgt <- sim$simulation %>%
+    .[var] %>%
     map(., ~select(.x, -date)) %>%
+    map(., ~t(.x))
+
 
   n_t <- dim(tgt[[1]])[2]
   n_sim <- nrow(sim$parameter$values)
@@ -98,34 +110,38 @@ tempawn <- function(sim, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
     map(., ~compute_dummy_95(.x)) %>%
     map(., ~add_column(., date = sim$simulation[[1]]$date, .before = 1))
 
+  res <- list(sensitivity = res_tbl,
+              simulation  = sim$simulation[var])
+
+  return(res)
 }
 
 
-#' Calculate pawn index for a sample defined by the indices idx (required for boot)
-#' @importFrom dplyr slice group_by summarise ungroup %>%
+
+#' Compute pawn_bin for all inputs and one target
+#'
+#' @param inp_tgt_i List that provides the input and the target pairs for all inputs
+#' @param idx index that defines the bin classes
+#' @param stat The summary statistics function that is implemented to compute
+#'   the PAWN index.
+#'
+#' @importFrom purrr map
 #' @keywords internal
-compute_dummy_95 <- function(res_i){
-  dummy_95 <- res_i %>%
-    select(starts_with("dummy_")) %>%
-    apply(., 1, quantile, probs = 0.95)
-
-  res_95 <- res_i %>%
-    select(-starts_with("dummy_")) %>%
-    add_column(., dummy = dummy_95)
-}
-
-merge_inp_tgt <- function(inp, tgt) {
-  map(inp, ~tibble(input = .x, target = tgt))
-}
-
+#'
 pawn_i <- function(inp_tgt_i,  idx, stat) {
   map(inp_tgt_i, ~ pawn_ij(inp_tgt_ij = .x, idx = idx, stat = stat))
 }
 
-
-#' Calculate pawn index for a sample defined by the indices idx (required for boot)
-#' @importFrom dplyr slice group_by summarise ungroup %>%
+#' Compute pawn_bin for one input and one target
+#'
+#' @param inp_tgt_ij Table that provides the input and the target pairs
+#' @param idx index that defines the bin classes
+#' @param stat The summary statistics function that is implemented to compute
+#'   the PAWN index.
+#'
+#' @importFrom purrr map_df
 #' @keywords internal
+#'
 pawn_ij <- function(inp_tgt_ij, idx, stat) {
   map_df(inp_tgt_ij, ~ pawn_bin(dat = .x, idx = idx, stat = stat))
 }
@@ -150,6 +166,41 @@ pawn_bin <- function(dat, idx, stat) {
     ungroup(.) %>%
     .$target %>%
     stat(.)
+}
+
+#' Merge inputs and targets
+#'
+#' @param inp Input
+#' @param tgt Target
+#'
+#' @importFrom tibble tibble
+#' @importFrom purrr map
+#' @keywords internal
+#'
+merge_inp_tgt <- function(inp, tgt) {
+  map(inp, ~tibble(input = .x, target = tgt))
+}
+
+#' Compute the 95% quantile of the target variable sensitivities for the dummy
+#'
+#' @param res_i Results for the sensitivity analysis for the target i
+#'
+#' @importFrom dplyr %>% select starts_with
+#' @importFrom tibble add_column
+#' @keywords internal
+#'
+compute_dummy_95 <- function(res_i){
+  if("dummy_1" %in% names(res_i)) {
+    dummy_95 <- res_i %>%
+      select(starts_with("dummy_")) %>%
+      apply(., 1, quantile, probs = 0.95)
+
+    res_i <- res_i %>%
+      select(-starts_with("dummy_")) %>%
+      add_column(., dummy = dummy_95)
+  }
+
+  return(res_i)
 }
 
 
