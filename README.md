@@ -79,6 +79,8 @@ Plotting the `temPAWN` results works with the function `plot()`. The result is a
 plot(pwn)
 ```
 
-<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: 12.5%;" />
+<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: auto;" />
 
+ ### References
  
+ Pianosi, F. and Wagener T.: Distribution-based sensitivity analysis from a generic input-output sample, *Environmental Modelling & Software*, 108, 197-207, doi: [10.1016/j.envsoft.2018.07.019](https://doi.org/10.1016/j.envsoft.2018.07.019), 2018
