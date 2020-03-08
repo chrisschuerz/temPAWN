@@ -50,6 +50,8 @@
 #'
 tempawn <- function(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cores = NULL) {
 
+  cores <- min(cores,detectCores())
+
   var_names <- names(sim$simulation)
 
   if (is.null(var)) {
@@ -57,6 +59,16 @@ tempawn <- function(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cor
   } else if (!any(var %in% var_names)) {
     stop("At least one of the variables not available in 'sim$simulation'")
   }
+
+  cat("Computation started on", cores, "cores:\n")
+
+  t0 <- now()
+  sim_stat <- list()
+  for (i in 1:length(var)) {
+    sim_stat[[var[i]]] <- get_sim_stat(sim$simulation[[var[i]]])
+    display_progress(i, length(var), t0, "simulation statistics:")
+  }
+  finish_progress(t0, "simulation statistics")
 
   tgt <- sim$simulation %>%
     .[var] %>%
@@ -85,12 +97,12 @@ tempawn <- function(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cor
 
   inp_name <- names(inp)
 
-  cores <- min(cores,detectCores())
+
   cl <- makeCluster(cores)
   registerDoSNOW(cl)
   t0 <- now()
   progress <- function(n){
-    display_progress(n, n_t, t0)
+    display_progress(n, n_t, t0,  "sensitivity analysis:")
   }
   opts <- list(progress = progress)
 
@@ -112,12 +124,34 @@ tempawn <- function(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cor
     map(., ~compute_dummy_95(.x)) %>%
     map(., ~add_column(., date = sim$simulation[[1]]$date, .before = 1))
 
+  finish_progress(t0, "sensitivity analysis")
+
   res <- list(sensitivity = res_tbl,
-              simulation  = sim$simulation[var])
+              simulation  = sim_stat)
+
+  class(res) <- "tempawn"
 
   return(res)
 }
 
+#' Compute min/max values for the simulation of each time step
+#'
+#' @param sim_tbl Table with simulated time series
+#'
+#' @importFrom dplyr mutate select
+#' @importFrom purrr pmap_dbl set_names
+#' @importFrom tibble add_column
+#' @keywords internal
+#'
+get_sim_stat <- function(sim_tbl) {
+  sim_tbl %>%
+    select(-date) %>%
+    mutate(q_max = pmap_dbl(., max),
+           q_min = pmap_dbl(., min)) %>%
+    select(q_min, q_max) %>%
+    set_names(c("sim_min", "sim_max")) %>%
+    add_column(date = sim_tbl$date, .before = 1)
+}
 
 
 #' Compute pawn_bin for all inputs and one target
@@ -216,7 +250,7 @@ compute_dummy_95 <- function(res_i){
 #' @importFrom lubridate as.period interval now seconds
 #' @keywords internal
 #'
-display_progress <- function(n, nmax, t0){
+display_progress <- function(n, nmax, t0, word){
   t1 <- now()
   time_elaps  <- interval(t0,t1) %>%
     round(.) %>%
@@ -227,8 +261,26 @@ display_progress <- function(n, nmax, t0){
     as.period(., unit = "days")
   prgs <- paste0(round(n/nmax*100, digits = 0), "%")
 
-  cat("\r", "Progress:", prgs,
+  cat("\r", "Progress", word, prgs,
       "  Time elapsed:", as.character(time_elaps),
       "  Time remaining:", as.character(time_remain),
       "   ")
+}
+
+#' Print message for completed process
+#'
+#' @param nmax Number of iterations
+#' @param t0 initial time step
+#'
+#' @importFrom dplyr %>%
+#' @importFrom lubridate as.period interval now
+#' @keywords internal
+#'
+finish_progress <- function(t0, word) {
+  cat("\r", paste0(rep(" ", 80), collapse = ""))
+  interval(t0,now()) %>%
+    round(.) %>%
+    as.period(.) %>%
+    as.character(.) %>%
+    cat("\r","Completed", word, "in", ., "\n")
 }

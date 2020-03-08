@@ -4,7 +4,7 @@
 \alias{display_progress}
 \title{Display the progress if iterative processes}
 \usage{
-display_progress(n, nmax, t0)
+display_progress(n, nmax, t0, word)
 }
 \arguments{
 \item{n}{Iteration step}
