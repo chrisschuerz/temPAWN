@@ -30,8 +30,8 @@ to a certain value.}
 }
 \value{
 Returns a list of tables where each table provides the sensitivities
-  for each time step of the simulation outputs to all the analyzed model
-  parameters.
+for each time step of the simulation outputs to all the analyzed model
+parameters.
 }
 \description{
 tempawn calculates the PAWN sensitivity index for each time step of simulation
@@ -42,12 +42,11 @@ dummy parameter.
 }
 \references{
 \cite{Pianosi, F. and Wagener T.: Distribution-based sensitivity analysis
-      from a generic input-output sample, Environmental Modelling & Software,
-      108, 197-207, \url{https://doi.org/10.1016/j.envsoft.2018.07.019}, 2018}
-
+from a generic input-output sample, Environmental Modelling & Software,
+108, 197-207, \url{https://doi.org/10.1016/j.envsoft.2018.07.019}, 2018}
 
 \cite{Pianosi, F. and Wagener T.: A simple and efficient method for global
-      sensitivity analysis based on cumulative distribution functions,
-      Environmental Modelling & Software, 67, 1-11,
-      \url{https://doi.org/10.1016/j.envsoft.2015.01.004}, 2015}
+sensitivity analysis based on cumulative distribution functions,
+Environmental Modelling & Software, 67, 1-11,
+\url{https://doi.org/10.1016/j.envsoft.2015.01.004}, 2015}
 }

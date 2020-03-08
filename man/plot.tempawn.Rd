@@ -11,7 +11,7 @@
 }
 \value{
 Returns a ggplot object with the visualization of the simulation ranges
-  and the individual temoral parameter sensitivities.
+and the individual temoral parameter sensitivities.
 }
 \description{
 Plot analysis results of temoral PAWN analysis

@@ -6,13 +6,6 @@ Authors@R: person("Christoph", "Schuerz",
                 email = "c.schuerz@posteo.org",
                 role = c("aut", "cre"),
                 comment = c(ORCID = '0000-0002-7204-5828'))
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-Authors@R: person("Christoph", "Schuerz",
-                email = "c.schuerz@posteo.org",
-                role = c("aut", "cre"),
-                comment = c(ORCID = '0000-0002-7204-5828'))
 Maintainer: Christoph Schuerz <c.schuerz@posteo.org>
 Description: tempawn calculates the PAWN sensitivity index for each time step of simulation
     results that were generated with the run_swat*() functions from the SWATplusR
@@ -32,7 +25,7 @@ Imports:
     parallel (>= 3.5.3),
     purrr (>= 0.3.2),
     patchwork,
-    tibble (>= 2.1.1)
+    tibble (>= 2.1.1),
     tidyr
 RoxygenNote: 7.0.2
 URL: https://github.com/chrisschuerz/temPAWN
