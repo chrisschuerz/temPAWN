@@ -65,7 +65,14 @@ sim_pwn  <- run_swatplus(project_path = pth,
 
 ### Analysis with `tempPAWN`
 
-To analyze the performed simulations use the function `tempawn()`. As the `sim` argument enter the data object that was returned by `run_swatplus()`. `tempawn()` provides additional input arguments for analysis settings. The two most relevant ones are `stat` and the `bins` arguments. To understand the effect of these arguments I want to refer to the publication of the PAWN method as it was proposed by Pianosi and Wagener ([2018](https://doi.org/10.1016/j.envsoft.2018.07.019)).
+To analyze the performed simulations use the function `tempawn()`. As the `sim` argument enter the data object that was returned by `run_swatplus()`. `tempawn()` provides additional input arguments for analysis settings. The two most relevant ones are `stat` and the `bins` arguments. To understand the effect of these arguments I want to refer to the publication of the PAWN method as it was proposed by Pianosi and Wagener ([2018](https://doi.org/10.1016/j.envsoft.2018.07.019)). The analysis is performed as follows:
+
+```r
+pwn <- tempawn(sim = sim_pwn)
+```
+
+### Visualization of the results
+
 
 
  
