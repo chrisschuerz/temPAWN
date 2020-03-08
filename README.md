@@ -73,6 +73,12 @@ pwn <- tempawn(sim = sim_pwn)
 
 ### Visualization of the results
 
-<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: auto;" />
+Plotting the `temPAWN` results works with the function `plot()`. The result is a visualization of the simulated ranges of the SWAT output variable and the corresponding parameter sensitivities.
+
+```r
+plot(pwn)
+```
+
+<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: 12.5%;" />
 
  
