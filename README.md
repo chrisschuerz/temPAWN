@@ -73,6 +73,6 @@ pwn <- tempawn(sim = sim_pwn)
 
 ### Visualization of the results
 
-<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="100%" style="display: block; margin: auto;" />
+<img src="fig/pwn_fig.png" title="plot of pwn demo" alt="plot of pwn demo" width="75%" style="display: block; margin: auto;" />
 
  
