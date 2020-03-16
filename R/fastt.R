@@ -30,6 +30,7 @@
 #'
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom dplyr %>% bind_cols bind_rows select
+#' @importFrom fast sensitivity
 #' @importFrom foreach foreach %dopar%
 #' @importFrom lubridate now
 #' @importFrom parallel detectCores makeCluster stopCluster
@@ -49,19 +50,19 @@
 #' @export
 #'
 fastt <- function(sim, var = NULL, cores = NULL) {
-  
+
   cores <- min(cores,detectCores())
-  
+
   var_names <- names(sim$simulation)
-  
+
   if (is.null(var)) {
     var <- var_names
   } else if (!any(var %in% var_names)) {
     stop("At least one of the variables not available in 'sim$simulation'")
   }
-  
+
   cat("Computation started on", cores, "cores:\n")
-  
+
   t0 <- now()
   sim_stat <- list()
   for (i in 1:length(var)) {
@@ -69,22 +70,20 @@ fastt <- function(sim, var = NULL, cores = NULL) {
     display_progress(i, length(var), t0, "simulation statistics:")
   }
   finish_progress(t0, "simulation statistics")
-  
+
   tgt <- sim$simulation %>%
     .[var] %>%
     map(., ~select(.x, -date)) %>%
     map(., ~t(.x))
-  
-  
+
   n_t <- dim(tgt[[1]])[2]
+  n_par <- ncol(sim$parameter$values)
   n_sim <- nrow(sim$parameter$values)
   idx <- 1:n_sim
-  
-  inp <- sim$parameter$values
-  
-  inp_name <- names(inp)
-  
-  
+
+  inp_name <- names(sim$parameter$values)
+
+
   cl <- makeCluster(cores)
   registerDoSNOW(cl)
   t0 <- now()
@@ -92,30 +91,38 @@ fastt <- function(sim, var = NULL, cores = NULL) {
     display_progress(n, n_t, t0,  "sensitivity analysis:")
   }
   opts <- list(progress = progress)
-  
+
   res_list <- foreach(t_i = 1:n_t,
-                      .packages = c("tibble", "purrr", "dplyr", "lubridate"),
+                      .packages = c("fast", "purrr", "dplyr", "lubridate"),
                       .options.snow = opts) %dopar% {
-                        inp_tgt_i <- tgt %>%
-                          map(., ~.x[,t_i]) %>%
-                          map(., ~ merge_inp_tgt(inp, .x))
-                        t_i <- pawn_i(inp_tgt_i, idx, stat)
-                        return(t_i)
+                        tgt_i <- tgt %>%
+                          map(., ~.x[,t_i])
+                          # map(., ~ merge_inp_tgt(inp, .x))
+                        s_i <- map(tgt_i, ~sensitivity(.x, n_par))
+                        return(s_i)
                       }
-  
+
   stopCluster(cl)
-  
+
   res_tbl <- res_list %>%
     transpose(.) %>%
-    map(., ~bind_rows(.x)) %>%
+    map(., ~make_tibble(.x, inp_name)) %>%
     map(., ~add_column(., date = sim$simulation[[1]]$date, .before = 1))
-  
+
   finish_progress(t0, "sensitivity analysis")
-  
+
   res <- list(sensitivity = res_tbl,
               simulation  = sim_stat)
-  
+
   class(res) <- "tempawn"
-  
+
   return(res)
+}
+
+make_tibble <- function(sens_list, inp_name) {
+  sens_list %>%
+    bind_cols() %>%
+    t(.) %>%
+    as_tibble(., .name_repair = "minimal") %>%
+    set_names(., inp_name)
 }
