@@ -4,8 +4,7 @@
 \alias{tempawn}
 \title{Calculate temporal PAWN indices}
 \usage{
-tempawn(sim, var = NULL, stat = median, bins = 25, dummy = TRUE,
-  cores = NULL)
+tempawn(sim, var = NULL, stat = median, bins = 25, dummy = TRUE, cores = NULL)
 }
 \arguments{
 \item{sim}{The simulation output object that results from a simulation with

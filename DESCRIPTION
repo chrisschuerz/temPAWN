@@ -7,7 +7,7 @@ Authors@R: person("Christoph", "Schuerz",
                 role = c("aut", "cre"),
                 comment = c(ORCID = '0000-0002-7204-5828'))
 Maintainer: Christoph Schuerz <c.schuerz@posteo.org>
-Description: tempawn calculates the PAWN sensitivity index for each time step of simulation
+Description: temPAWN calculates the PAWN sensitivity index for each time step of simulation
     results that were generated with the run_swat*() functions from the SWATplusR
     package. The PAWN method is implemented according to Pianosi and Wagener (2018).
     tempawn optionally includes the computation of the temporal sensitivity of a
